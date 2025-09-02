@@ -13,7 +13,9 @@ class Bucket:
     def add_bucket_overflow(self) -> None:
         """Add a bucket overflow indicator."""
         overflow_bucket = Bucket(
-            name=f"{self.name} - OVERFLOW", bucket_size=self.bucket_size, words={}
+            name=f"{self.name} - OVERFLOW - {len(self.overflows)}",
+            bucket_size=self.bucket_size,
+            words={},
         )
         self.overflows.append(overflow_bucket)
 
@@ -27,7 +29,7 @@ class Bucket:
         """Check if the bucket is full."""
         return len(self.words) >= self.bucket_size
 
-    def add_word(self, word: str, page: str) -> None:
+    def add_word(self, word: str, page: str) -> bool:
         """Add a word to the bucket."""
         if self.is_full():
             last_overflow = self.get_last_bucket_overflow()
@@ -36,12 +38,14 @@ class Bucket:
                 last_overflow = self.get_last_bucket_overflow()
 
             if last_overflow.is_full():
-                last_overflow.add_bucket_overflow()
+                self.add_bucket_overflow()
                 last_overflow = self.get_last_bucket_overflow()
 
             last_overflow.add_word(word, page)
-        else:
-            self.words[word] = page
+            return True
+
+        self.words[word] = page
+        return False
 
     @staticmethod
     def create_buckets(quantity, bucket_size):
