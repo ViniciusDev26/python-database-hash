@@ -20,3 +20,27 @@ def hash_word(word, max_number):
         hash_value += ord(char) * (prime**i)
 
     return hash_value % max_number
+
+
+def find_word_in_buckets(word, buckets):
+    """
+    Find a word in the list of buckets.
+
+    Args:
+        word (str): The word to find
+        buckets (list): List of Bucket objects
+
+    Returns:
+        str | None: The page where the word is found, or None if not found
+    """
+    index = hash_word(word, len(buckets))
+    print(f"Searching for '{word}' in bucket index {index}")
+    bucket = buckets[index]
+    result = bucket.words[word]
+    if result is None:
+        for overflow in bucket.overflows:
+            result = overflow.words[word]
+            if result is not None:
+                return result
+
+    return result

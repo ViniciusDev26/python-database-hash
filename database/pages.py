@@ -1,4 +1,4 @@
-def mount_pages(page_size: int, words_list: list[str]) -> list[list[int]]:
+def mount_pages(page_size: int, words_list: list[str]) -> list[list[str]]:
     """Mount pages from a list of words.
 
     Args:
@@ -6,10 +6,19 @@ def mount_pages(page_size: int, words_list: list[str]) -> list[list[int]]:
         words_list (list[str]): List of words to be paginated.
 
     Returns:
-        list[list[int]]: List of pages, each containing indices of words.
+        list[list[int]]: List of pages, each containing words.
     """
     pages = []
-    for i in range(0, len(words_list), page_size):
-        page = list(range(i, min(i + page_size, len(words_list))))
-        pages.append(page)
+    current_page = []
+
+    for word in words_list:
+        current_page.append(word)
+
+        if len(current_page) == page_size:
+            pages.append(current_page)
+            current_page = []
+
+    if current_page:
+        pages.append(current_page)
+
     return pages
