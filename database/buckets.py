@@ -1,3 +1,6 @@
+import math
+
+
 class Bucket:
     """Class representing a bucket with a name and a list of words."""
 
@@ -48,8 +51,10 @@ class Bucket:
         return False
 
     @staticmethod
-    def create_buckets(quantity, bucket_size):
+    def create_buckets(quantity_words, bucket_size):
         """Create a list of buckets with specified quantity."""
+        quantity = math.ceil(quantity_words / bucket_size)
+
         return [
             Bucket(name=f"Bucket {i+1}", bucket_size=bucket_size, words={})
             for i in range(quantity)

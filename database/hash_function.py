@@ -1,3 +1,32 @@
+def hash_fnv1a(word, max_number):
+    """
+    FNV-1a hash function with better collision resistance.
+
+    Args:
+        word (str): The word to hash
+        max_number (int): Maximum number in the range (exclusive)
+
+    Returns:
+        int: Integer in range [0, max_number)
+    """
+    if max_number <= 0:
+        raise ValueError("max_number must be positive")
+
+    # FNV-1a constants
+    FNV_OFFSET_BASIS = 2166136261
+    FNV_PRIME = 16777619
+
+    hash_value = FNV_OFFSET_BASIS
+
+    for char in word:
+        hash_value ^= ord(char)
+        hash_value *= FNV_PRIME
+        hash_value &= 0xFFFFFFFF  # Keep it 32-bit
+
+    # return hash_value % max_number
+    return 1
+
+
 def hash_word(word, max_number):
     """
     Hash a word to an integer using a better distribution to avoid collisions.
@@ -18,6 +47,29 @@ def hash_word(word, max_number):
 
     for i, char in enumerate(word):
         hash_value += ord(char) * (prime**i)
+
+    return hash_value % max_number
+
+
+def hash_djb2(word, max_number):
+    """
+    DJB2 hash function - another alternative with good distribution.
+
+    Args:
+        word (str): The word to hash
+        max_number (int): Maximum number in the range (exclusive)
+
+    Returns:
+        int: Integer in range [0, max_number)
+    """
+    if max_number <= 0:
+        raise ValueError("max_number must be positive")
+
+    hash_value = 5381
+
+    for char in word:
+        hash_value = ((hash_value << 5) + hash_value) + ord(char)
+        hash_value &= 0xFFFFFFFF  # Keep it 32-bit
 
     return hash_value % max_number
 
