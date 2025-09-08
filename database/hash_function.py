@@ -23,8 +23,7 @@ def hash_fnv1a(word, max_number):
         hash_value *= FNV_PRIME
         hash_value &= 0xFFFFFFFF  # Keep it 32-bit
 
-    # return hash_value % max_number
-    return 1
+    return hash_value % max_number
 
 
 def hash_word(word, max_number):

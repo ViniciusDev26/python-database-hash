@@ -36,11 +36,7 @@ class Bucket:
         """Add a word to the bucket."""
         if self.is_full():
             last_overflow = self.get_last_bucket_overflow()
-            if last_overflow is None:
-                self.add_bucket_overflow()
-                last_overflow = self.get_last_bucket_overflow()
-
-            if last_overflow.is_full():
+            if last_overflow is None or last_overflow.is_full():
                 self.add_bucket_overflow()
                 last_overflow = self.get_last_bucket_overflow()
 
