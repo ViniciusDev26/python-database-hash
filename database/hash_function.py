@@ -85,7 +85,6 @@ def find_word_in_buckets(word, buckets):
         str | None: The page where the word is found, or None if not found
     """
     index = hash_word(word, len(buckets))
-    print(f"Searching for '{word}' in bucket index {index}")
     bucket = buckets[index]
     result = bucket.words[word]
     if result is None:
