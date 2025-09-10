@@ -11,7 +11,6 @@ from database.read_file import read_file
 from database.pages import mount_pages
 from database.buckets import Bucket
 from database.metrics import show_parameters
-from loguru import logger
 
 
 # Define o estado para persistir os valores entre as execuções
@@ -45,34 +44,25 @@ with st.sidebar:
     # Botão para iniciar a construção do índice
     if st.button("Construir Índice"):
         st.info("Construindo índice...")
-        logger.info(
-            f"Starting database hash run with {lines_per_page} lines per page and bucket size {bucket_size}"
-        )
 
         start_time_run = time.time()
 
         words = read_file(database)
-        logger.success(f"Read {len(words)} words from file")
 
         pages = mount_pages(lines_per_page, words)
 
-        logger.success(f"Created {len(pages)} pages")
         buckets = Bucket.create_buckets(len(words), bucket_size)
 
-        logger.info("Starting word insertion process")
         for page_index, word_indices in enumerate(pages):
             for word in word_indices:
                 bucket_index = hash_fn(str(word), len(buckets))
                 buckets[bucket_index].add_word(str(word), page_index)
-
-        logger.info("Finished word insertion process")
 
         # Get metrics
         metrics = show_parameters(words=words, num_pages=len(pages), buckets=buckets)
 
         # Log all metrics in success message with line breaks
         metrics_str = "\n".join([f"  {key}: {value}" for key, value in metrics.items()])
-        logger.success(f"Process completed:\n{metrics_str}")
 
         end_time_run = time.time()
         st.session_state.run_time = end_time_run - start_time_run

@@ -1,5 +1,4 @@
 import math
-from loguru import logger
 
 
 class Bucket:
@@ -12,7 +11,6 @@ class Bucket:
         self.overflows = []
         self.collisions = 0
         self.overflow_count = 0
-        logger.success(f"Created bucket '{self.name}' with size {self.bucket_size}")
 
     def __repr__(self) -> str:
         return f"Bucket(name={self.name}, words={self.words})"
@@ -25,9 +23,6 @@ class Bucket:
             words={},
         )
         self.overflows.append(overflow_bucket)
-        logger.info(
-            f"Created overflow bucket for '{self.name}': {overflow_bucket.name}"
-        )
 
     def get_last_bucket_overflow(self) -> "Bucket | None":
         """Get the last bucket overflow if it exists."""
@@ -51,9 +46,6 @@ class Bucket:
         if self.is_full():
             # Colisão: bucket cheio, nova palavra precisa ir para overflow
             self.collisions += 1
-            logger.warning(
-                f"Collision occurred in bucket '{self.name}' for word '{word}'"
-            )
 
             last_overflow = self.get_last_bucket_overflow()
             if last_overflow is None or last_overflow.is_full():
@@ -69,14 +61,10 @@ class Bucket:
     def create_buckets(quantity_words, bucket_size):
         """Create a list of buckets with specified quantity."""
         quantity = math.ceil((quantity_words * 1.2) / bucket_size)
-        logger.info(
-            f"Creating {quantity} buckets for {quantity_words} words with bucket size {bucket_size}"
-        )
 
         buckets = [
             Bucket(name=f"Bucket {i+1}", bucket_size=bucket_size, words={})
             for i in range(quantity)
         ]
 
-        logger.success(f"Successfully created {len(buckets)} buckets")
         return buckets
