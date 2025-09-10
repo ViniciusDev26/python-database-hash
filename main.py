@@ -142,7 +142,7 @@ if st.session_state.metrics:
 
                 # Exibição simplificada de custo e tempo
                 st.info("Custo da busca com índice: 1 acesso ao disco (1 página lida)")
-                st.info(f"Tempo decorrido: {search_time:.6f} segundos")
+                st.info(f"Tempo decorrido: {search_time:.12f} segundos")
             else:
                 st.error("Por favor, construa o índice primeiro")
         else:
@@ -165,7 +165,7 @@ if st.session_state.metrics:
                         f"Palavra '{search_word}' encontrada na página {page_index + 1}"
                     )
                     st.info(f"Custo da Varredura de Tabela: {pages_read} páginas lidas")
-                    st.info(f"Tempo decorrido: {table_scan_time:.6f} segundos")
+                    st.info(f"Tempo decorrido: {table_scan_time:.12f} segundos")
                     found = True
                     break
 
@@ -175,7 +175,7 @@ if st.session_state.metrics:
                 st.session_state.table_scan_time = table_scan_time
                 st.warning(f"Palavra '{search_word}' não encontrada")
                 st.info(f"Custo da Varredura de Tabela: {pages_read} páginas lidas")
-                st.info(f"Tempo decorrido: {table_scan_time:.6f} segundos")
+                st.info(f"Tempo decorrido: {table_scan_time:.12f} segundos")
 
         else:
             st.error(
@@ -186,5 +186,5 @@ if st.session_state.metrics:
     if "search_time" in st.session_state and "table_scan_time" in st.session_state:
         st.subheader("Comparação de Tempo")
         st.write(
-            f"Diferença de tempo (Varredura de Tabela - Busca com Índice): {st.session_state.table_scan_time - st.session_state.search_time:.6f} segundos"
+            f"Diferença de tempo (Varredura de Tabela - Busca com Índice): {st.session_state.table_scan_time - st.session_state.search_time:.12f} segundos"
         )
