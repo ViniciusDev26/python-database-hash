@@ -1,11 +1,18 @@
 import streamlit as st
 import pandas as pd
 import time
-from database.index import run
-from database.hash_function import find_word_in_buckets, hash_word
+from database.hash_function import (
+    find_word_in_buckets,
+    hash_fnv1a,
+    hash_djb2,
+    hash_word,
+)
 from database.read_file import read_file
 from database.pages import mount_pages
 from database.buckets import Bucket
+from database.metrics import show_parameters
+from loguru import logger
+
 
 # Define o estado para persistir os valores entre as execuções
 if "metrics" not in st.session_state:
@@ -21,30 +28,57 @@ st.subheader("Projeto Banco de Dados")
 # Parâmetros de entrada
 with st.sidebar:
     st.header("Parâmetros")
+    database = st.selectbox("Base de Dados", ["words.txt"])
+    hash_function = st.selectbox(
+        "Função Hash", ["FNV-1a", "Polynomial Rolling Hash", "DJB2"]
+    )
     lines_per_page = st.number_input("Linhas por página", min_value=1, value=100)
     bucket_size = st.number_input("Tamanho do bucket", min_value=1, value=300)
+
+    hash_mapper = {
+        "FNV-1a": hash_fnv1a,
+        "Polynomial Rolling Hash": hash_word,
+        "DJB2": hash_djb2,
+    }
+    hash_fn = hash_mapper[hash_function]
 
     # Botão para iniciar a construção do índice
     if st.button("Construir Índice"):
         st.info("Construindo índice...")
+        logger.info(
+            f"Starting database hash run with {lines_per_page} lines per page and bucket size {bucket_size}"
+        )
 
         start_time_run = time.time()
-        st.session_state.metrics = run(
-            lines_per_page=lines_per_page, bucket_size=bucket_size
-        )
+
+        words = read_file(database)
+        logger.success(f"Read {len(words)} words from file")
+
+        pages = mount_pages(lines_per_page, words)
+
+        logger.success(f"Created {len(pages)} pages")
+        buckets = Bucket.create_buckets(len(words), bucket_size)
+
+        logger.info("Starting word insertion process")
+        for page_index, word_indices in enumerate(pages):
+            for word in word_indices:
+                bucket_index = hash_fn(str(word), len(buckets))
+                buckets[bucket_index].add_word(str(word), page_index)
+
+        logger.info("Finished word insertion process")
+
+        # Get metrics
+        metrics = show_parameters(words=words, num_pages=len(pages), buckets=buckets)
+
+        # Log all metrics in success message with line breaks
+        metrics_str = "\n".join([f"  {key}: {value}" for key, value in metrics.items()])
+        logger.success(f"Process completed:\n{metrics_str}")
+
         end_time_run = time.time()
         st.session_state.run_time = end_time_run - start_time_run
-
-        words = read_file("words.txt")
-        st.session_state.pages = mount_pages(lines_per_page, words)
-
-        num_words = len(words)
-        st.session_state.buckets = Bucket.create_buckets(num_words, bucket_size)
-
-        for page_index, page_words in enumerate(st.session_state.pages):
-            for word in page_words:
-                bucket_index = hash_word(str(word), len(st.session_state.buckets))
-                st.session_state.buckets[bucket_index].add_word(str(word), page_index)
+        st.session_state.pages = pages
+        st.session_state.buckets = buckets
+        st.session_state.metrics = metrics
 
         st.success("Índice construído")
         st.info(f"Tempo construção do índice: {st.session_state.run_time:.4f} segundos")
@@ -100,7 +134,11 @@ if st.session_state.metrics:
         if search_word:
             if st.session_state.buckets:
                 start_time = time.time()
-                found_page = find_word_in_buckets(search_word, st.session_state.buckets)
+
+                print(len(st.session_state.buckets))
+                found_page = find_word_in_buckets(
+                    hash_fn, search_word, st.session_state.buckets
+                )
                 end_time = time.time()
                 search_time = end_time - start_time
                 st.session_state.search_time = search_time

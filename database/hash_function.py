@@ -73,7 +73,7 @@ def hash_djb2(word, max_number):
     return hash_value % max_number
 
 
-def find_word_in_buckets(word, buckets):
+def find_word_in_buckets(hash_fn, word, buckets):
     """
     Find a word in the list of buckets.
 
@@ -84,9 +84,14 @@ def find_word_in_buckets(word, buckets):
     Returns:
         str | None: The page where the word is found, or None if not found
     """
-    index = hash_word(word, len(buckets))
+    index = hash_fn(word, len(buckets))
     bucket = buckets[index]
 
+    print(
+        f"Searching in bucket {index} with {len(bucket.words)} words and {len(bucket.overflows)} overflows"
+    )
+
+    print(f"Bucket words: {list(bucket.words.keys())}")
     result = bucket.words.get(word, None)
     if result is None:
         for overflow in bucket.overflows:
