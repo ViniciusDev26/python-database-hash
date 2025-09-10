@@ -1,8 +1,8 @@
-from read_file import read_file
-from pages import mount_pages
-from buckets import Bucket
-import hash_function
-from metrics import show_parameters
+import database.hash_function as hash_function
+from database.read_file import read_file
+from database.pages import mount_pages
+from database.buckets import Bucket
+from database.metrics import show_parameters
 from loguru import logger
 
 
@@ -35,6 +35,3 @@ def run(lines_per_page: int, bucket_size) -> dict:
     logger.success(f"Process completed:\n{metrics_str}")
 
     return metrics
-
-
-run(lines_per_page=100, bucket_size=300)

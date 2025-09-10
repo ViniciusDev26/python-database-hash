@@ -1,4 +1,4 @@
-from buckets import Bucket
+from database.buckets import Bucket
 
 
 def calculate_rate_bucket_overflows(buckets: list[Bucket]) -> float:

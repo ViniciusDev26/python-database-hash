@@ -86,10 +86,11 @@ def find_word_in_buckets(word, buckets):
     """
     index = hash_word(word, len(buckets))
     bucket = buckets[index]
-    result = bucket.words[word]
+
+    result = bucket.words.get(word, None)
     if result is None:
         for overflow in bucket.overflows:
-            result = overflow.words[word]
+            result = overflow.words.get(word, None)
             if result is not None:
                 return result
 
